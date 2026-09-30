@@ -12,13 +12,21 @@ function T {
 }
 
 $desktop = [Environment]::GetFolderPath("DesktopDirectory")
-if ([string]::IsNullOrWhiteSpace($desktop)) { $desktop = [Environment]::GetFolderPath("Desktop") }
+
+if ([string]::IsNullOrWhiteSpace($desktop)) {
+    $desktop = [Environment]::GetFolderPath("Desktop")
+}
 
 $trigger = Join-Path $desktop "HDT_ONECLICK_EXPORT.trigger"
 $status = Join-Path $desktop "HDT_ONECLICK_EXPORT.status"
+
 Remove-Item $status -Force -ErrorAction SilentlyContinue
 
-[System.IO.File]::WriteAllText($trigger,(Get-Date).ToString("o"),(New-Object System.Text.UTF8Encoding($false)))
+[System.IO.File]::WriteAllText(
+    $trigger,
+    (Get-Date).ToString("o"),
+    (New-Object System.Text.UTF8Encoding($false))
+)
 
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Cyan
@@ -30,8 +38,10 @@ Write-Host (T "Make sure Hearthstone and HDT are open." "Assicurati che Hearthst
 Write-Host ""
 
 $deadline = (Get-Date).AddSeconds(90)
+
 while ((Get-Date) -lt $deadline) {
     Start-Sleep -Milliseconds 500
+
     if (Test-Path $status) {
         $message = [System.IO.File]::ReadAllText($status)
         Remove-Item $status -Force -ErrorAction SilentlyContinue
