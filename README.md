@@ -693,3 +693,11 @@ MIT License.
 See:
 
 [LICENSE](LICENSE)
+
+---
+
+## Support / Sostieni il progetto
+
+The plugin is free and open source. If you find it useful and would like to buy me a coffee, you can leave a voluntary contribution via [PayPal](https://paypal.me/maneihdagofficial). Thank you =)
+
+Il plugin è gratuito e open source. Se ti è utile e vuoi offrirmi un caffè, puoi lasciare un contributo volontario tramite [PayPal](https://paypal.me/maneihdagofficial). Grazie =)
