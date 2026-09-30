@@ -11,4 +11,11 @@
 - Automatic timestamped archive.
 - Privacy-conscious public schema without BattleTag/account identifiers.
 - Documentation, sample file and troubleshooting guides.
+
+### Fixed
+
 - Installer now detects the managed HDT executable inside Squirrel `app-*` folders and ignores the native root launcher.
+
+### Verified
+
+- End-to-end install and collection export tested successfully with HDT 1.58.5.
