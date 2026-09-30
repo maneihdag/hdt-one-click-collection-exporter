@@ -7,6 +7,9 @@
 ![HDT Plugin](https://img.shields.io/badge/HDT-plugin-orange)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
 ![Languages](https://img.shields.io/badge/docs-English%20%7C%20Italian-green)
+![Status](https://img.shields.io/badge/status-v1.0.0%20tested-brightgreen)
+
+**Current status:** v1.0.0 has been tested end-to-end with HDT 1.58.5: install → plugin load → local export → JSON validation.
 
 ## English
 
@@ -38,6 +41,14 @@ Useful for:
 - Automatic timestamped local archive.
 - English and Italian installers/export launchers.
 - Privacy-conscious public schema: BattleTag and Blizzard account identifiers are omitted.
+
+### How it works
+
+```text
+Hearthstone → Hearthstone Deck Tracker → local HDT plugin → HDT_Collection.json
+```
+
+The installer compiles the small plugin locally against the HDT assemblies already installed on your PC. The export itself stays local.
 
 ### Requirements
 
@@ -169,7 +180,7 @@ Puoi anche usare **Export now / Esporta ora** direttamente dalla voce del plugin
 
 ## Project status
 
-`v1.0.0` — first public version.
+`v1.0.0` — first public version, tested end-to-end with HDT 1.58.5.
 
 ### Roadmap
 
