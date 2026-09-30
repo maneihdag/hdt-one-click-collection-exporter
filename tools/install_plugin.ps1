@@ -27,6 +27,29 @@ if (-not (Test-Path $source)) {
 
 $hdtExe = $null
 
+function Test-ManagedAssembly {
+    param([string]$Path)
+
+    if (-not $Path -or -not (Test-Path $Path)) {
+        return $false
+    }
+
+    try {
+        [void][System.Reflection.AssemblyName]::GetAssemblyName($Path)
+        return $true
+    }
+    catch {
+        return $false
+    }
+}
+
+# A Squirrel-based HDT install can contain both:
+# - a native launcher in the installation root; and
+# - the real managed HDT executable inside an app-X.Y.Z folder.
+#
+# Only the managed executable can be passed to csc.exe as an assembly reference.
+$candidatePaths = New-Object System.Collections.Generic.List[string]
+
 try {
     $processes = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
         Where-Object {
@@ -34,39 +57,62 @@ try {
             $_.ExecutablePath -match "Hearthstone.*Deck.*Tracker.*\.exe$"
         }
 
-    if ($processes) {
-        $hdtExe = ($processes | Select-Object -First 1).ExecutablePath
+    foreach ($process in $processes) {
+        if ($process.ExecutablePath) {
+            $candidatePaths.Add($process.ExecutablePath)
+        }
     }
 }
 catch {}
 
-if (-not $hdtExe) {
-    $roots = @(
-        (Join-Path $env:LOCALAPPDATA "HearthstoneDeckTracker"),
-        (Join-Path $env:LOCALAPPDATA "Programs\Hearthstone Deck Tracker"),
-        (Join-Path $env:APPDATA "HearthstoneDeckTracker"),
-        (Join-Path ${env:ProgramFiles} "Hearthstone Deck Tracker")
-    ) | Where-Object { $_ -and (Test-Path $_) }
+$roots = @(
+    (Join-Path $env:LOCALAPPDATA "HearthstoneDeckTracker"),
+    (Join-Path $env:LOCALAPPDATA "Programs\Hearthstone Deck Tracker"),
+    (Join-Path $env:APPDATA "HearthstoneDeckTracker"),
+    (Join-Path ${env:ProgramFiles} "Hearthstone Deck Tracker")
+) | Where-Object { $_ -and (Test-Path $_) }
 
-    $hits = @()
+foreach ($root in $roots) {
+    try {
+        $hits = @()
+        $hits += Get-ChildItem -Path $root -Filter "HearthstoneDeckTracker.exe" -File -Recurse -ErrorAction SilentlyContinue
+        $hits += Get-ChildItem -Path $root -Filter "Hearthstone Deck Tracker.exe" -File -Recurse -ErrorAction SilentlyContinue
 
-    foreach ($root in $roots) {
-        try {
-            $hits += Get-ChildItem -Path $root -Filter "HearthstoneDeckTracker.exe" -File -Recurse -ErrorAction SilentlyContinue
-            $hits += Get-ChildItem -Path $root -Filter "Hearthstone Deck Tracker.exe" -File -Recurse -ErrorAction SilentlyContinue
+        foreach ($hit in $hits) {
+            $candidatePaths.Add($hit.FullName)
         }
-        catch {}
     }
+    catch {}
+}
 
-    if ($hits) {
-        $hdtExe = ($hits | Sort-Object LastWriteTime -Descending | Select-Object -First 1).FullName
+$managedCandidates = @()
+
+foreach ($path in ($candidatePaths | Select-Object -Unique)) {
+    if (Test-ManagedAssembly $path) {
+        $item = Get-Item $path -ErrorAction SilentlyContinue
+
+        if ($item) {
+            $managedCandidates += [PSCustomObject]@{
+                Path = $item.FullName
+                InVersionFolder = if ($item.FullName -match "[\\/]app-[^\\/]+[\\/]") { 1 } else { 0 }
+                LastWriteTime = $item.LastWriteTime
+            }
+        }
     }
 }
 
+$selected = $managedCandidates |
+    Sort-Object @{ Expression = "InVersionFolder"; Descending = $true }, @{ Expression = "LastWriteTime"; Descending = $true } |
+    Select-Object -First 1
+
+$hdtExe = if ($selected) { $selected.Path } else { $null }
+
 if (-not $hdtExe -or -not (Test-Path $hdtExe)) {
-    Write-Host (T "Hearthstone Deck Tracker was not found." "Hearthstone Deck Tracker non è stato trovato.") -ForegroundColor Red
+    Write-Host (T "A usable managed Hearthstone Deck Tracker executable was not found." "Non è stato trovato un eseguibile .NET utilizzabile di Hearthstone Deck Tracker.") -ForegroundColor Red
     Write-Host ""
     Write-Host (T "Open HDT and leave it running, then run the installer again." "Apri HDT e lascialo aperto, poi rilancia l'installer.")
+    Write-Host ""
+    Write-Host (T "The native Squirrel launcher is intentionally ignored." "Il launcher nativo di Squirrel viene ignorato intenzionalmente.")
     Write-Host ""
     Read-Host (T "Press ENTER to close" "Premi INVIO per chiudere")
     exit 1
@@ -74,7 +120,7 @@ if (-not $hdtExe -or -not (Test-Path $hdtExe)) {
 
 $hdtDir = Split-Path -Parent $hdtExe
 
-Write-Host (T "HDT found:" "HDT trovato:")
+Write-Host (T "Managed HDT assembly found:" "Assembly HDT .NET trovata:")
 Write-Host $hdtExe -ForegroundColor DarkGray
 Write-Host ""
 
