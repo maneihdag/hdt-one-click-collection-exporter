@@ -1,0 +1,44 @@
+{
+  "format_version": 1,
+  "exported_at": "2026-09-30T10:00:00Z",
+  "source": "Hearthstone Deck Tracker",
+  "dust": 420,
+  "collection": {
+    "7": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "8": [
+      2,
+      1,
+      0,
+      0
+    ],
+    "12345": [
+      0,
+      0,
+      1,
+      0
+    ],
+    "67890": [
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "favorite_heroes": {},
+  "cardbacks": [],
+  "favorite_cardback": 0,
+  "player_records": {},
+  "summary": {
+    "unique_owned_dbf_ids": 4,
+    "normal": 3,
+    "golden": 1,
+    "diamond": 1,
+    "signature": 1,
+    "total_owned": 6
+  }
+}

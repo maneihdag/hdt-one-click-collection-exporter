@@ -1,0 +1,12 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.dll
+*.pdb
+*.zip
+HDT_Collection.json
+HDT Collection Archive/
+HDT_ONECLICK_EXPORT.trigger
+HDT_ONECLICK_EXPORT.status
